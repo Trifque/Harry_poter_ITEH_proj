@@ -14,7 +14,7 @@ class CreateAwardsTable extends Migration
     public function up()
     {
         Schema::create('awards', function (Blueprint $table) {
-            $table->id('award_id');
+            $table->bigIncrements('award_id');
             $table->string('award_type');
             $table->string('award_name');
             $table->timestamps();
