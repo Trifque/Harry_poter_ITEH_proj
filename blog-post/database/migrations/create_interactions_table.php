@@ -32,6 +32,11 @@ class CreateInteractionsTable extends Migration
      */
     public function down()
     {
+        Schema::table('interactions', function (Blueprint $table) {
+            $table->dropForeign('user_id');
+            $table->dropForeign('post_id');
+        });
+
         Schema::dropIfExists('interactions');
     }
 }

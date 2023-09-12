@@ -13,7 +13,7 @@ class CreateAwardedToTable extends Migration
      */
     public function up()
     {
-        Schema::create('awarded_to', function (Blueprint $table) {
+        Schema::create('awarded_tos', function (Blueprint $table) {
             $table->id('awarded_to_id');
             $table->unsignedBigInteger('award_id');
             $table->unsignedBigInteger('user_id');
@@ -33,6 +33,12 @@ class CreateAwardedToTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('awarded_to');
+        Schema::table('awarded_tos', function (Blueprint $table) {
+            $table->dropForeign('user_id');
+            $table->dropForeign('award_id');
+            $table->dropForeign('post_id');
+        });
+
+        Schema::dropIfExists('awarded_tos');
     }
 }
