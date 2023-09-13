@@ -19,6 +19,7 @@ class CreatePostsTable extends Migration
             $table->unsignedBigInteger('category_id');
             $table->date('date');
             $table->time('time');
+            $table->string('title');
             $table->mediumText('content');
             $table->integer('popularity');
             $table->timestamps();

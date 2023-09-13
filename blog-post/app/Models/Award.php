@@ -10,4 +10,11 @@ class Award extends Model
     use HasFactory;
 
     public function awarded_tos(){ return $this->hasMany(Awarded_to::class); }
+
+    protected $fillable = 
+    [
+        'award_type',
+        'award_name',
+        'description'
+    ];
 }

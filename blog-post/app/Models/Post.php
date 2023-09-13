@@ -15,4 +15,15 @@ class Post extends Model
     public function awarded_tos(){ return $this->hasMany(Awarded_to::class); }
     public function interactions(){ return $this->hasMany(Interaction::class); }
     public function comments(){ return $this->hasMany(Comment::class); }
+
+    protected $fillable = 
+    [
+        'user_id',
+        'category_id',
+        'title',
+        'content',
+        'date',
+        'time',
+        'popularity'
+    ];
 }

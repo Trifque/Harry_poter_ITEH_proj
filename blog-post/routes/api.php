@@ -2,6 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +17,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {return $request->user();});
+
+Route::post('/createPost', [PostController::class, 'createPost']);
+Route::put('/editPost', [PostController::class, 'editPost']);
+Route::delete('/deletePost', [PostController::class, 'deletePost']);
+
+Route::post('/createCategory', [CategoriesController::class, 'createCategory']);
+Route::delete('/deleteCategory', [CategoriesController::class, 'deleteCategory']);
+
+Route::get('/loginUser', [UserController::class, 'loginUser']);
+Route::post('/createUser', [UserController::class, 'createUser']);

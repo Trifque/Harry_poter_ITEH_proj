@@ -17,6 +17,7 @@ class CreateAwardsTable extends Migration
             $table->bigIncrements('award_id');
             $table->string('award_type');
             $table->string('award_name');
+            $table->string('description');
             $table->timestamps();
         });
     }

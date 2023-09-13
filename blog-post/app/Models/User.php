@@ -13,4 +13,20 @@ class User extends Model
     public function awarded_tos(){ return $this->hasMany(Awarded_to::class); }
     public function interactions(){ return $this->hasMany(Interaction::class); }
     public function comments(){ return $this->hasMany(Comment::class); }
+
+    protected $fillable = 
+    [
+        'username',
+        'password',
+        'country',
+        'gender',
+        'birth_date',
+        'join_date',
+        'email',
+        'biography',
+        'role',
+        'house',
+        'first_name',
+        'last_name'
+    ];
 }
