@@ -14,6 +14,8 @@ class User extends Model
     public function interactions(){ return $this->hasMany(Interaction::class); }
     public function comments(){ return $this->hasMany(Comment::class); }
 
+    protected $primaryKey = 'user_id';
+
     protected $fillable = 
     [
         'username',

@@ -21,7 +21,7 @@ class PostController extends Controller
         public function getPostsMadeByUser($user_id)
         {
             $posts = Post::where('user_id', $user_id)->get();
-            $posts = Post::getPostData($posts,$user_id);
+            $posts = PostController::getPostData($posts,$user_id);
             
             if(is_null($posts)){
                 return response() -> json('Data not found', 404);
@@ -34,11 +34,11 @@ class PostController extends Controller
             $likedPosts = Interaction::where('user_id',$user_id)->where('type','like')->get('post_id');
             $posts = $likedPosts->map(function ($likedPost)
             {
-                $post = Post::where('post_id',$likedPost[0]['post_id']);
+                $post = Post::where('post_id',$likedPost['post_id'])->first();
                 return $post;
             });
 
-            $posts = Post::getPostData($posts,$user_id);
+            $posts = PostController::getPostData($posts,$user_id);
             
             if(is_null($posts)){
                 return response() -> json('Data not found', 404);
@@ -51,11 +51,11 @@ class PostController extends Controller
             $savedPosts = Interaction::where('user_id',$user_id)->where('type','save')->get('post_id');
             $posts = $savedPosts->map(function ($savedPost)
             {
-                $post = Post::where('post_id',$savedPost[0]['post_id']);
+                $post = Post::where('post_id',$savedPost['post_id'])->first();
                 return $post;
             });
 
-            $posts = Post::getPostData($posts,$user_id);
+            $posts = PostController::getPostData($posts,$user_id);
             
             if(is_null($posts)){
                 return response() -> json('Data not found', 404);
@@ -66,13 +66,14 @@ class PostController extends Controller
         public function getPostsCommentedByUser($user_id)
         {
             $commentedPosts = Comment::where('user_id',$user_id)->get('post_id');
+            $commentedPosts = $commentedPosts->unique();
             $posts = $commentedPosts->map(function ($commentedPost)
             {
-                $post = Post::where('post_id',$commentedPost[0]['post_id']);
+                $post = Post::where('post_id',$commentedPost['post_id'])->first();
                 return $post;
             });
 
-            $posts = Post::getPostData($posts,$user_id);
+            $posts = PostController::getPostData($posts,$user_id);
             
             if(is_null($posts)){
                 return response() -> json('Data not found', 404);
@@ -91,7 +92,7 @@ class PostController extends Controller
         {
             $oneWeekAgo = Carbon::now()->subWeek();
             $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->get();
-            $posts = Post::getPostData($posts,$user_id);
+            $posts = PostController::getPostData($posts,$user_id);
             
             if(is_null($posts)){
                 return response() -> json('Data not found', 404);
@@ -101,11 +102,9 @@ class PostController extends Controller
 
         public function getPostsByCategory($category, $user_id)
         {
-            $category_id = Category::where('category_name', $category)->get('category_id');
-            $category_id = $category_id[0];
-
+            $category_id = Category::where('category_name', $category)->pluck('category_id');
             $posts = Post::where('category_id', $category_id)->get();
-            $posts = Post::getPostData($posts,$user_id);
+            $posts = PostController::getPostData($posts,$user_id);
             
             if(is_null($posts)){
                 return response() -> json('Data not found', 404);
@@ -144,27 +143,28 @@ class PostController extends Controller
                 'content' => 'required|string',
             ]);
 
-            $post = Post::find($validatedData['post_id']);
+            $post = Post::where('post_id',$validatedData['post_id'])->first();
             $post->update($validatedData);
 
-            return response()->json(['message' => 'Post created successfully', 'data' => $post], 201);
+            return response()->json(['message' => 'Post edited successfully', 'data' => $post], 201);
         }
 
     /* DELETE-eri */
         
-    public function deletePost(Request $request)
-    {
-        $validatedData = $request->validate(['post_id' => 'required|integer']);
-        Post::where('post_id', $validatedData['post_id'])->delete();
+        public function deletePost(Request $request)
+        {
+            $validatedData = $request->validate(['post_id' => 'required|integer']);
+            Post::where('post_id', $validatedData['post_id'])->delete();
 
-        return response()->json(['message' => 'Post Deleted successfully'], 201);
-    }
+            return response()->json(['message' => 'Post Deleted successfully'], 201);
+        }
     
     /* Pomocna funkcija koja se ponavlja/koristi svugde za postove */
 
     public function getPostData($posts, $user_id)
     {
-        $posts = $posts->map(function ($post) use($user_id) {
+        $posts = $posts->map(function ($post) use($user_id) 
+        {
 
             $post['id'] = $post['post_id'];
             $post_category = Category::where('category_id',$post['category_id'])->get('category_name');
@@ -179,27 +179,28 @@ class PostController extends Controller
             $user_dislike = false;
             $user_saved = false;
             $interactions = Interaction::where('post_id', $post['id'])->get();
-            $interactions = $interactions->map(function ($interaction) use($likes,$dislikes,$user_like,$user_dislike,$user_saved,$user_id) 
+            $interactions->each(function ($interaction) use(&$likes ,&$dislikes ,&$user_like ,&$user_dislike ,&$user_saved ,$user_id ) 
             {
-                if($interaction['type'] == 'like'){
-                    if($interaction['user_id'] == $user_id)
+                if($interaction['type'] == 'like')
                     {
-                        $user_like = true;
+                        if($interaction['user_id'] == $user_id)
+                            {
+                                $user_like = true;
+                            }
+                        $likes++;
                     }
-                    $likes++;
-                } else if($interaction['type'] == 'dislike')
-                {
-                    if($interaction['user_id'] == $user_id)
+                else if($interaction['type'] == 'dislike')
                     {
-                        $user_dislike = true;
+                        if($interaction['user_id'] == $user_id)
+                            {
+                                $user_dislike = true;
+                            }
+                        $dislikes++;
                     }
-                    $dislikes++;
-                }
-
                 if($interaction['type'] == 'save' && $interaction['user_id'] == $user_id)
-                {
-                    $user_saved = true;
-                }
+                    {
+                        $user_saved = true;
+                    }
             });
 
             $post['likes'] = $likes;
@@ -217,8 +218,7 @@ class PostController extends Controller
             });
             $post['comments'] = $comments;
 
-            $award_ids = Award::all()->get('award_id');
-            $award_ids = collect($award_ids)->pluck('award_id');
+            $award_ids = Award::all()->pluck('award_id');
             $all_awards_to_this_post = Awarded_to::where('post_id', $post['id'])->get();
             $total_number_of_awards_on_post = 0;
             $award_counts = [];
@@ -230,12 +230,13 @@ class PostController extends Controller
             }
             $post['awards'] = $award_counts;
 
-            $post['popularity'] = $likes + (2 * sizeof($comments)) + (10 * $total_number_of_awards_on_post);
+            $post['popularity'] = 0 + $likes -$dislikes + (2 * sizeof($comments)) + (10 * $total_number_of_awards_on_post);
 
             unset($post['post_id']);
             unset($post['category_id']);
             return $post;
         });
+        return $posts;
     }
         
 

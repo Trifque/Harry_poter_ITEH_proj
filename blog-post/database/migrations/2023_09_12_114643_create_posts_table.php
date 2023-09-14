@@ -16,12 +16,11 @@ class CreatePostsTable extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->bigIncrements('post_id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('category_id');
+            $table->unsignedBigInteger('category_id')->nullable();
             $table->date('date');
             $table->time('time');
             $table->string('title');
             $table->mediumText('content');
-            $table->integer('popularity');
             $table->timestamps();
 
             $table->foreign('user_id')->references('user_id')->on('users');

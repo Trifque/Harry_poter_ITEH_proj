@@ -16,6 +16,8 @@ class Post extends Model
     public function interactions(){ return $this->hasMany(Interaction::class); }
     public function comments(){ return $this->hasMany(Comment::class); }
 
+    protected $primaryKey = 'post_id';
+
     protected $fillable = 
     [
         'user_id',

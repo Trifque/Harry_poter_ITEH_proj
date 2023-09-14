@@ -11,6 +11,8 @@ class Award extends Model
 
     public function awarded_tos(){ return $this->hasMany(Awarded_to::class); }
 
+    protected $primaryKey = 'award_id';
+
     protected $fillable = 
     [
         'award_type',

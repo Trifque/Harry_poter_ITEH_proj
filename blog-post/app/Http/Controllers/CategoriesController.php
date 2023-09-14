@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\Post;
 
 class CategoriesController extends Controller
 {
@@ -40,6 +41,7 @@ class CategoriesController extends Controller
     public function deleteCategory(Request $request)
     {
         $validatedData = $request->validate(['category_id' => 'required|integer']);
+        Post::where('category_id', $validatedData['category_id'])->update(['category_id' => NULL]);
         Category::where('category_id', $validatedData['category_id'])->delete();
 
         return response()->json(['message' => 'Category Deleted successfully'], 201);
