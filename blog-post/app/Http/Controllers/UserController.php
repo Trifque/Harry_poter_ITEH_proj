@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -75,47 +76,56 @@ class UserController extends Controller
         {
             $username = $request->input('username');
             $password = $request->input('password');
-            $users = User::where('username', $username)->where('password',$password)->get();
-
+            $users = User::where('username', $username)->get();
             $user = $users[0];
-            $user['id'] = $user['user_id'];
-            $user['bio'] = $user['biography'];
-            $user['member_since'] = $user['join_date'];
-            unset($user['user_id']);
-            unset($user['biography']);
-            unset($user['join_date']);
             
-            if(is_null($user)){
-                return response() -> json('Data not found', 404);
-            }
-            return response()->json($user);
+    
+            if ($user && Hash::check($password, $user->password)) {
+                $user['id'] = $user['user_id'];
+                $user['bio'] = $user['biography'];
+                $user['member_since'] = $user['join_date'];
+                unset($user['user_id']);
+                unset($user['biography']);
+                unset($user['join_date']);
+
+                return response()->json(['message' => 'User login successful', 'data' => $user], 201);
+            } else {
+                return response()->json(['message' => 'Invalid credentials'], 401);
+            }     
+
         }
 
     /* POST-eri */
 
-        public function createUser(Request $request)
-        {
-            $validatedData = $request->validate
-            ([
-                'username' => 'required|string',
-                'password' => 'required|string',
-                'first_name' => 'required|string',
-                'last_name' => 'required|string',
-                'country' => 'required|string',
-                'gender' => 'required|string',
-                'house' => 'required|string',
-                'role' => 'required|string',
-                'email' => 'required|string',
-                'birth_date' => 'required|date',
-                'biography' => 'required|string',
-            ]);
+    public function createUser(Request $request)
+    {
+        $validatedData = $request->validate
+        ([
+            'username' => 'required|string',
+            'password' => 'required|string',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'country' => 'required|string',
+            'gender' => 'required|string',
+            'house' => 'required|string',
+            'role' => 'required|string',
+            'email' => 'required|string',
+            'birth_date' => 'required|date',
+            'biography' => 'required|string',
+        ]);
 
-            $validatedData['join_date'] = date('Y-m-d');
-
-            echo("Bilo sta bukvalno");
-
-            $user = User::create($validatedData);
-
-            return response()->json(['message' => 'User created successfully', 'data' => $user], 201);
+         // username vec postoji 422 Unprocessable Entity status code
+        if (User::where('username', $validatedData['username'])->exists()) {
+            return response()->json(['message' => 'Username already taken'], 422);
         }
+
+        // Hashiranje passworda
+        $validatedData['password'] = Hash::make($validatedData['password']);
+
+        $validatedData['join_date'] = date('Y-m-d');
+
+        $user = User::create($validatedData);
+
+        return response()->json(['message' => 'User created successfully', 'data' => $user], 201);
+    }
 }

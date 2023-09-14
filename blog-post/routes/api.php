@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Awarded_toController;
+use App\Http\Controllers\InteractionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,3 +31,9 @@ Route::delete('/deleteCategory', [CategoriesController::class, 'deleteCategory']
 
 Route::get('/loginUser', [UserController::class, 'loginUser']);
 Route::post('/createUser', [UserController::class, 'createUser']);
+
+Route::post('/createComment', [CommentController::class, 'createComment']);
+
+Route::post('/giveAward', [Awarded_toController::class, 'giveAward']);
+
+Route::post('/makeInteraction', [InteractionController::class, 'makeInteraction']);

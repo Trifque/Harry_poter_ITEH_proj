@@ -14,8 +14,6 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    /* SVE ZA POST */
-
     /* GET-eri */
 
         public function getPostsMadeByUser($user_id)
