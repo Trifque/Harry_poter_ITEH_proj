@@ -129,4 +129,36 @@ class UserController extends Controller
 
         return response()->json(['message' => 'User created successfully', 'data' => $user], 201);
     }
+
+    /* PUT-eri */
+        public function editUser(Request $request)
+            {
+                $validatedData = $request->validate
+                ([
+                    'user_id' => 'required|integer',
+                    'username' => 'sometimes|integer',
+                    'country' => 'sometimes|string',
+                    'gender' => 'sometimes|string',
+                    'brith_date' => 'sometimes|date',
+                    'email' => 'sometimes|string',
+                    'biography' => 'sometimes|string',
+                    'house' => 'sometimes|string',
+                    'first_name' => 'sometimes|string',
+                    'last_name' => 'sometimes|string',
+                ]);
+
+                $user = User::where('user_id',$validatedData['user_id'])->first();
+                $user->update($validatedData);
+
+                return response()->json(['message' => 'User edited successfully', 'data' => $user], 201);
+            }
+
+            public function banUser($user_id)
+            {
+
+                $user = User::where('user_id',$user_id)->first();
+                $user->update(['username' => 0]);
+
+                return response()->json(['message' => 'The BANNHAMER has spoken', 'data' => $user], 201);
+            }
 }

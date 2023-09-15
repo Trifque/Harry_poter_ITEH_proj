@@ -22,6 +22,7 @@ use App\Http\Controllers\InteractionController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {return $request->user();});
 
+Route::get('/getForYouPage/{user_id}', [PostController::class, 'getForYouPage']);
 Route::post('/createPost', [PostController::class, 'createPost']);
 Route::put('/editPost', [PostController::class, 'editPost']);
 Route::delete('/deletePost', [PostController::class, 'deletePost']);
@@ -29,8 +30,10 @@ Route::delete('/deletePost', [PostController::class, 'deletePost']);
 Route::post('/createCategory', [CategoriesController::class, 'createCategory']);
 Route::delete('/deleteCategory', [CategoriesController::class, 'deleteCategory']);
 
+Route::put('/editUser', [UserController::class, 'editUser']);
 Route::post('/loginUser', [UserController::class, 'loginUser']);
 Route::post('/createUser', [UserController::class, 'createUser']);
+Route::put('/banUser/{user_id}', [UserController::class, 'banUser']);
 
 Route::post('/createComment', [CommentController::class, 'createComment']);
 

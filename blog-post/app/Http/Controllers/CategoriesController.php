@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Post;
+use Illuminate\Support\Carbon;
 
 class CategoriesController extends Controller
 {
@@ -12,7 +13,7 @@ class CategoriesController extends Controller
 
     /* GET-eri */
 
-        public function getAllCategories()
+        public static function getAllCategories()
         {
             $categories = Category::all();
             
@@ -22,6 +23,32 @@ class CategoriesController extends Controller
             return response()->json($categories);
         }
 
+
+        public static function tagCloud()
+        {
+            $categories = Category::all();
+            $oneWeekAgo = Carbon::now()->subWeek();
+            $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->get();
+
+            $categoryCounts = $posts->groupBy('category_id')->map(function ($group) {
+                return $group->count();
+            });
+    
+            $result = [];
+            foreach ($categories as $category) {
+                $categoryId = $category->category_id;
+                $categoryName = $category->category_name;
+                $popularity = $categoryCounts->has($categoryId) ? $categoryCounts[$categoryId] : 0;
+        
+                $result[] = [
+                    'category_id' => $categoryId,
+                    'category_name' => $categoryName,
+                    'popularity' => $popularity,
+                ];
+            }
+        
+            return $result;
+        }
     /* POST-eri */
 
     public function createCategory(Request $request)
@@ -35,7 +62,6 @@ class CategoriesController extends Controller
 
             return response()->json(['message' => 'Category created successfully', 'data' => $category], 201);
         }
-
     /* DELETE-eri */
 
     public function deleteCategory(Request $request)

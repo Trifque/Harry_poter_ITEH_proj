@@ -26,6 +26,7 @@ Route::get('/getAllRegularUsers', [UserController::class, 'getAllRegularUsers'])
 Route::get('/getUserById/{user_id}', [UserController::class, 'getUserById']);
 
 Route::get('/getAllCategories', [CategoriesController::class, 'getAllCategories']);
+Route::get('/tagCloud', [CategoriesController::class, 'tagCloud']);
 
 Route::get('/getAllAwards', [AwardController::class, 'getAllAwards']);
 

@@ -79,12 +79,54 @@ class PostController extends Controller
             return response()->json($posts);
         }
 
-        //public function getForYouPage($user_id)
-        //{
-        //    $oneWeekAgo = Carbon::now()->subWeek();
-        //    $posts = Interaction::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->get();
-        //    $posts = Post::getPostData($posts,$user_id);
-        //}
+        public function getForYouPage($user_id)
+        {
+            $oneWeekAgo = Carbon::now()->subWeek();
+            $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->get();
+            $likedPostIds = Interaction::where('user_id',$user_id)->where('type','like')->pluck('post_id');
+            $likedCategory = [];
+            $likedPostIds->each(function($likedPostId) use(&$likedCategory)
+        {
+            $category_id = Post::where('post_id', $likedPostId)->pluck('category_id')->first();
+            if($category_id != NULL)
+            {
+                $existingCategory = array_filter($likedCategory, function ($item) use ($category_id) {
+                    return $item['category_id'] === $category_id;
+                });
+        
+                if (!empty($existingCategory)) {
+                    $existingCategory = array_values($existingCategory);
+                    $likedCategory[array_keys($existingCategory)[0]]['count']++;
+                } else {
+                    $likedCategory[] = [
+                        'category_id' => $category_id,
+                        'count' => 1,
+                    ];
+                }
+            }
+        });
+
+            usort($likedCategory, function ($a, $b) 
+            {
+                return $b['count'] - $a['count'];
+            });
+
+        $postsSorted = NULL;
+        foreach ($likedCategory as $category)
+        {
+            $posts->map(function ($post) use(&$postsSorted, $category)
+            {
+                if($post['category_id'] == $category['category_id'])
+                {
+                    $postsSorted[] = $post;
+                }
+            });
+        }
+            $postsSorted = collect($postsSorted);
+            $postsSorted = PostController::getPostData($postsSorted, $user_id);
+
+            return response()->json($postsSorted);
+        }
 
         public function getNewPosts($user_id)
         {
@@ -136,9 +178,9 @@ class PostController extends Controller
             $validatedData = $request->validate
             ([
                 'post_id' => 'required|integer',
-                'category_id' => 'required|integer',
-                'title' => 'required|string',
-                'content' => 'required|string',
+                'category_id' => 'sometimes|integer',
+                'title' => 'sometimes|string',
+                'content' => 'sometimes|string',
             ]);
 
             $post = Post::where('post_id',$validatedData['post_id'])->first();
@@ -166,7 +208,11 @@ class PostController extends Controller
 
             $post['id'] = $post['post_id'];
             $post_category = Category::where('category_id',$post['category_id'])->get('category_name');
-            $post['category'] = $post_category[0]['category_name'];
+            if ($post_category->isEmpty()) {
+                $post['category'] = 'Unknown category';
+            } else {
+                $post['category'] = $post_category[0]['category_name'];
+            }
             $post_creator = User::where('user_id',$post['user_id'])->get(['house','first_name','last_name','username']);
             $post['house'] = $post_creator[0]['house'];
             $post['user'] = $post_creator[0]['first_name'] . ' ' . $post_creator[0]['last_name'] . ' (' . $post_creator[0]['username'] . ')';
