@@ -27,61 +27,92 @@ class InteractionController extends Controller
             $post_owner = Post::where('post_id',$validatedData['post_id'])->pluck('user_id');
             $user = User::where('user_id',$post_owner)->first();
             $popularity = $user['popularity'];
-            echo($user);
 
             $interaction = null;
             $alreadyThere = false;
             $editedWhatIsAlreadyThere = false;
             foreach ($oldInteraction as $oneOldInteraction) {
-                if ($editedWhatIsAlreadyThere || $alreadyThere || $interaction !== null) {
-                    break;
-                }
                 switch ($validatedData['type']) {
                     case 'like':
-                        switch ($oneOldInteraction['type']) {
+                    {   
+                        switch ($oneOldInteraction['type']) 
+                        {
                             case 'like':
-                                $alreadyThere = true;
+                                {   
+                                    $oneOldInteraction->delete();
+                                    $alreadyThere = true;
+                                     break;
+                                }
                             case 'dislike':
                                 {
                                     $oneOldInteraction->update($validatedData);
                                     $editedWhatIsAlreadyThere = true;
                                     $alreadyThere = true;
                                     $popularity = $popularity + 2;
+                                    break;
                                 }
-                                break;
                             case 'save':
-                                break;
+                                {
+                                    break;
+                                }
                         }
                         break;
+                    }
                     case 'dislike':
-                        switch ($oneOldInteraction['type']) {
+                    {
+                        switch ($oneOldInteraction['type']) 
+                        {
                             case 'like':
                                 {
                                     $oneOldInteraction->update($validatedData);
                                     $editedWhatIsAlreadyThere = true;
                                     $alreadyThere = true;
                                     $popularity = $popularity - 2;
+                                    break;
                                 }
-                                break;
                             case 'dislike':
-                                $alreadyThere = true;
+                                {
+                                    $oneOldInteraction->delete();
+                                    $alreadyThere = true;
+                                    break;
+                                }
                             case 'save':
-                                break;
+                                {
+                                    break;
+                                }
                         }
                         break;
+                    }
                     case 'save':
-                        switch ($oneOldInteraction['type']) {
+                    {
+                        switch ($oneOldInteraction['type']) 
+                        {
                             case 'like':
-                                $interaction = Interaction::create($validatedData);
-                                break;
+                                {
+                                    $interaction = Interaction::create($validatedData);
+                                    break;
+                                }
                             case 'dislike':
-                                $interaction = Interaction::create($validatedData);
-                                break;
+                                {
+                                    $interaction = Interaction::create($validatedData);
+                                    break;
+                                }
                             case 'save':
-                                $alreadyThere = true;
+                                {
+                                    $oneOldInteraction->delete();
+                                    $alreadyThere = true;
+                                    break;
+                                }
                         }
                         break;
+                    }
+
+                    if ($editedWhatIsAlreadyThere || $alreadyThere || $interaction != null) 
+                    {
+                        break;
+                    }
                 }
+
             }
 
             if($alreadyThere == false)
@@ -106,9 +137,7 @@ class InteractionController extends Controller
                 return response()->json(['message' => 'Interaction has been edited successfully'], 201);
             } else
             {
-                return response()->json(['message' => 'Interaction is already there and no changes have been made'], 201);
+                return response()->json(['message' => 'Your interaction has been unmade successfully'], 201);
             }
         }
-
-    /* DELETE-eri */
 }
