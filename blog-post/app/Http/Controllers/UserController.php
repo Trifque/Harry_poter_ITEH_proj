@@ -77,6 +77,9 @@ class UserController extends Controller
             $username = $request->input('username');
             $password = $request->input('password');
             $users = User::where('username', $username)->get();
+            if ($users->isEmpty()) {
+                return response()->json(['message' => 'Invalid credentials'], 401);
+            }
             $user = $users[0];
             
     
@@ -114,12 +117,10 @@ class UserController extends Controller
             'biography' => 'required|string',
         ]);
 
-         // username vec postoji 422 Unprocessable Entity status code
         if (User::where('username', $validatedData['username'])->exists()) {
             return response()->json(['message' => 'Username already taken'], 422);
         }
 
-        // Hashiranje passworda
         $validatedData['password'] = Hash::make($validatedData['password']);
 
         $validatedData['join_date'] = date('Y-m-d');
