@@ -29,7 +29,7 @@ Route::delete('/deletePost', [PostController::class, 'deletePost']);
 Route::post('/createCategory', [CategoriesController::class, 'createCategory']);
 Route::delete('/deleteCategory', [CategoriesController::class, 'deleteCategory']);
 
-Route::get('/loginUser', [UserController::class, 'loginUser']);
+Route::post('/loginUser', [UserController::class, 'loginUser']);
 Route::post('/createUser', [UserController::class, 'createUser']);
 
 Route::post('/createComment', [CommentController::class, 'createComment']);
