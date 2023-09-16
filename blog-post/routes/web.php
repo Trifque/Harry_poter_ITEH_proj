@@ -30,6 +30,7 @@ Route::get('/tagCloud', [CategoriesController::class, 'tagCloud']);
 
 Route::get('/getAllAwards', [AwardController::class, 'getAllAwards']);
 
+Route::get('/getPostById/{post_id}/{user_id}', [PostController::class, 'getPostById']);
 Route::get('/getPostsMadeByUser/{user_id}', [PostController::class, 'getPostsMadeByUser']);
 Route::get('/getPostsLikedByUser/{user_id}', [PostController::class, 'getPostsLikedByUser']);
 Route::get('/getPostsSavedByUser/{user_id}', [PostController::class, 'getPostsSavedByUser']);

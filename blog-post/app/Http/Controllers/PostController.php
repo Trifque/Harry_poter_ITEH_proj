@@ -16,6 +16,19 @@ class PostController extends Controller
 {
     /* GET-eri */
 
+        public function getPostByid($post_id, $user_id)
+        {
+            $posts = Post::where('post_id',$post_id)->get();
+
+            if (is_null($posts) || $posts->isEmpty()) {
+                return response()->json('Data not found', 404);
+            }
+
+            $posts = PostController::getPostData($posts,$user_id)->first();
+
+            return response()->json($posts);
+        }
+
         public function getPostsMadeByUser($user_id)
         {
             $posts = Post::where('user_id', $user_id)->get();
@@ -64,7 +77,9 @@ class PostController extends Controller
         public function getPostsCommentedByUser($user_id)
         {
             $commentedPosts = Comment::where('user_id',$user_id)->get('post_id');
-            $commentedPosts = $commentedPosts->unique();
+            echo($commentedPosts);
+            $commentedPosts = $commentedPosts->unique('post_id');
+            echo($commentedPosts);
             $posts = $commentedPosts->map(function ($commentedPost)
             {
                 $post = Post::where('post_id',$commentedPost['post_id'])->first();

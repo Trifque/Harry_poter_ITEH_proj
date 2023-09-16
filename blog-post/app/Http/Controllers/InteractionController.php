@@ -89,12 +89,10 @@ class InteractionController extends Controller
                         {
                             case 'like':
                                 {
-                                    $interaction = Interaction::create($validatedData);
                                     break;
                                 }
                             case 'dislike':
                                 {
-                                    $interaction = Interaction::create($validatedData);
                                     break;
                                 }
                             case 'save':
