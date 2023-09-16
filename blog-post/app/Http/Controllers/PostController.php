@@ -82,7 +82,7 @@ class PostController extends Controller
             {
                 $post = Post::where('post_id',$commentedPost['post_id'])->first();
                 return $post;
-            });
+            })->values();
 
             $posts = PostController::getPostData($posts,$user_id);
             
@@ -95,7 +95,7 @@ class PostController extends Controller
         public function getForYouPage($user_id)
         {
             $oneWeekAgo = Carbon::now()->subWeek();
-            $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->get();
+            $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->orderBy('time', 'DESC')->get();
             $likedPostIds = Interaction::where('user_id',$user_id)->where('type','like')->pluck('post_id');
             $likedCategory = [];
             $likedPostIds->each(function($likedPostId) use(&$likedCategory)
