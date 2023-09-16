@@ -94,60 +94,49 @@ class PostController extends Controller
 
         public function getForYouPage($user_id)
         {
-            $oneWeekAgo = Carbon::now()->subWeek();
-            $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->orderBy('time', 'DESC')->get();
-            $likedPostIds = Interaction::where('user_id',$user_id)->where('type','like')->pluck('post_id');
+
+            $likedPostIds = Interaction::where('user_id', $user_id)->where('type', 'like')->pluck('post_id');
+            $likedPostCategories = Post::whereIn('post_id', $likedPostIds)->pluck('category_id');
             $likedCategory = [];
-            $likedPostIds->each(function($likedPostId) use(&$likedCategory)
-        {
-            $category_id = Post::where('post_id', $likedPostId)->pluck('category_id')->first();
-            if($category_id != NULL)
+            
+            foreach ($likedPostCategories as $category_id) 
             {
-                $existingCategory = array_filter($likedCategory, function ($item) use ($category_id) {
-                    return $item['category_id'] === $category_id;
-                });
-        
-                if (!empty($existingCategory)) {
-                    $existingCategory = array_values($existingCategory);
-                    $likedCategory[array_keys($existingCategory)[0]]['count']++;
-                } else {
-                    $likedCategory[] = [
-                        'category_id' => $category_id,
-                        'count' => 1,
-                    ];
+                if (!isset($likedCategory[$category_id])) 
+                {
+                    $likedCategory[$category_id] = 1;
+                } else 
+                {
+                    $likedCategory[$category_id]++;
                 }
             }
-        });
+            arsort($likedCategory);
 
-            usort($likedCategory, function ($a, $b) 
-            {
-                return $b['count'] - $a['count'];
-            });
+            $oneWeekAgo = Carbon::now()->subWeek();
+            $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->orderBy('time', 'DESC')->get();
+            $postsSorted = [];
 
-        $postsSorted = NULL;
-        foreach ($likedCategory as $category)
-        {
-            $posts->map(function ($post) use(&$postsSorted, $category)
-            {
-                if($post['category_id'] == $category['category_id'])
+            foreach ($likedCategory as $category_id => $count) {
+                foreach ($posts as $post) 
                 {
-                    $postsSorted[] = $post;
+                    if ($post->category_id == $category_id) {
+                        $postsSorted[] = $post;
+                    }
                 }
-            });
-        }
+            }
             $postsSorted = collect($postsSorted);
             $postsSorted = PostController::getPostData($postsSorted, $user_id);
 
             return response()->json($postsSorted);
         }
-
+        
         public function getNewPosts($user_id)
         {
             $oneWeekAgo = Carbon::now()->subWeek();
             $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->orderBy('time', 'DESC')->get();
             $posts = PostController::getPostData($posts,$user_id);
             
-            if(is_null($posts)){
+            if(is_null($posts))
+            {
                 return response() -> json('Data not found', 404);
             }
             return response()->json($posts);
@@ -159,7 +148,8 @@ class PostController extends Controller
             $posts = Post::where('category_id', $category_id)->get();
             $posts = PostController::getPostData($posts,$user_id);
             
-            if(is_null($posts)){
+            if(is_null($posts))
+            {
                 return response() -> json('Data not found', 404);
             }
             return response()->json($posts);
