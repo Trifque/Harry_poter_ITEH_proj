@@ -144,7 +144,7 @@ class PostController extends Controller
         public function getNewPosts($user_id)
         {
             $oneWeekAgo = Carbon::now()->subWeek();
-            $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->get();
+            $posts = Post::where('date', '>=', $oneWeekAgo)->orderBy('date', 'DESC')->orderBy('time', 'DESC')->get();
             $posts = PostController::getPostData($posts,$user_id);
             
             if(is_null($posts)){
