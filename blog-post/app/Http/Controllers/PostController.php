@@ -77,9 +77,7 @@ class PostController extends Controller
         public function getPostsCommentedByUser($user_id)
         {
             $commentedPosts = Comment::where('user_id',$user_id)->get('post_id');
-            echo($commentedPosts);
             $commentedPosts = $commentedPosts->unique('post_id');
-            echo($commentedPosts);
             $posts = $commentedPosts->map(function ($commentedPost)
             {
                 $post = Post::where('post_id',$commentedPost['post_id'])->first();
